@@ -17,27 +17,33 @@ public class Client {
         SocketChannel channel = SocketChannel.open();
         channel.connect(new InetSocketAddress(serverIP, serverPort));
 
-        Scanner keyboard = new Scanner(System.in);
-        String message = keyboard.nextLine();
-
         // Client enters command
-//        char command;
-//        Scanner keyboard = new Scanner(System.in);
-//        System.out.println(
-//                """
-//                        Enter a command:
-//                        U - Upload
-//                        D - Download
-//                        L - List
-//                        R - Rename
-//                        M - Move
-//                        T - Delete
-//                        H - Help
-//                        Q - Quit
-//                """
-//        );
-//        command = keyboard.nextLine().toUpperCase().charAt(0);
+        char command;
 
+        do {
+            Scanner keyboard = new Scanner(System.in);
+            System.out.println(
+                    """
+                                    Enter a command:
+                                    U - Upload
+                                    D - Download
+                                    L - List
+                                    R - Rename
+                                    T - Delete
+                                    Q - Quit
+                            """
+            );
+            command = keyboard.nextLine().toUpperCase().charAt(0);
+
+            switch (command) {
+                case 'U':
+                case 'D':
+                case 'L':
+                case 'R':
+                case 'T':
+            }
+
+        } while (command != 'Q');
 
 
         ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
