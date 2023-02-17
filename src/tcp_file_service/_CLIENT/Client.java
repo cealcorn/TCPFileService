@@ -1,4 +1,4 @@
-package tcp_file_service;
+package tcp_file_service._CLIENT;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class Client {
     public static void main(String[] args) throws IOException {
         if (args.length != 2) {
-            System.out.println("Usage: tcp_file_service.Client <ServerIP> <ServerPort>");
+            System.out.println("Usage: tcp_file_service._CLIENT.Client <ServerIP> <ServerPort>");
             return;
         }
         String serverIP = args[0];
