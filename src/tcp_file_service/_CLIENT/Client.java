@@ -8,12 +8,12 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws IOException {
-        Scanner keyboard = new Scanner(System.in);
-
-        System.out.println("Enter IP address of Server: ");
-        String serverIP = keyboard.nextLine();
-        System.out.println("Enter port number of Server: ");
-        int serverPortNumber = Integer.parseInt(keyboard.nextLine());
+        if (args.length != 2) {
+            System.out.println("Usage: tcp_file_service.TCPFileService <ServerIP> <ServerPort>");
+            return;
+        }
+        String serverIP = args[0];
+        int serverPort = Integer.parseInt(args[1]);
 
         // Client enters command
         char command;
@@ -31,22 +31,30 @@ public class Client {
                                     Q - Quit
                             """
             );
+            Scanner keyboard = new Scanner(System.in);
             command = keyboard.nextLine().toUpperCase().charAt(0);
 
             switch (command) {
-                case 'U' -> {}
-                case 'D' -> {}
-                case 'L' -> {}
+                case 'U' -> {
+                }
+                case 'D' -> {
+
+                }
+                case 'L' -> {
+
+                }
                 case 'R' -> {
                     System.out.println("Enter file to be renamed: ");
                     String filetoRename = "R" + keyboard.nextLine();
-                    status = sendCommand(filetoRename, serverIP, serverPortNumber).toUpperCase();
+                    System.out.println("Enter new file name: ");
+                    filetoRename = "," + keyboard.nextLine();
+                    status = sendCommand(filetoRename, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
                 }
                 case 'T' -> {
                     System.out.println("Enter file name: ");
                     String fileToDelete = "T" + keyboard.nextLine();
-                    status = sendCommand(fileToDelete, serverIP, serverPortNumber).toUpperCase();
+                    status = sendCommand(fileToDelete, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
                 }
             }
