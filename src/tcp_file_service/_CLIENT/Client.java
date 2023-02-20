@@ -45,10 +45,11 @@ public class Client {
                 }
                 case 'R' -> {
                     System.out.println("Enter file to be renamed: ");
-                    String filetoRename = "R" + keyboard.nextLine();
+                    String oldFileName = keyboard.nextLine();
                     System.out.println("Enter new file name: ");
-                    filetoRename = "," + keyboard.nextLine();
-                    status = sendCommand(filetoRename, serverIP, serverPort).toUpperCase();
+                    String newFileName = keyboard.nextLine();
+                    String fileToRename = "R" + oldFileName + "," + newFileName;
+                    status = sendCommand(fileToRename, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
                 }
                 case 'T' -> {
