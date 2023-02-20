@@ -8,20 +8,18 @@ import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) throws IOException {
-        if (args.length != 2) {
-            System.out.println("Usage: tcp_file_service._CLIENT.Client <ServerIP> <ServerPort>");
-            return;
-        }
-        String serverIP = args[0];
-        int serverPort = Integer.parseInt(args[1]);
-        SocketChannel channel = SocketChannel.open();
-        channel.connect(new InetSocketAddress(serverIP, serverPort));
+        Scanner keyboard = new Scanner(System.in);
+
+        System.out.println("Enter IP address of Server: ");
+        String serverIP = keyboard.nextLine();
+        System.out.println("Enter port number of Server: ");
+        int serverPortNumber = Integer.parseInt(keyboard.nextLine());
 
         // Client enters command
         char command;
+        String status;
 
         do {
-            Scanner keyboard = new Scanner(System.in);
             System.out.println(
                     """
                                     Enter a command:
@@ -36,15 +34,29 @@ public class Client {
             command = keyboard.nextLine().toUpperCase().charAt(0);
 
             switch (command) {
-                case 'U':
-                case 'D':
-                case 'L':
-                case 'R':
-                case 'T':
+                case 'U' -> {}
+                case 'D' -> {}
+                case 'L' -> {}
+                case 'R' -> {
+                    System.out.println("Enter file to be renamed: ");
+                    String filetoRename = "R" + keyboard.nextLine();
+                    status = sendCommand(filetoRename, serverIP, serverPortNumber).toUpperCase();
+                    checkStatus(status);
+                }
+                case 'T' -> {
+                    System.out.println("Enter file name: ");
+                    String fileToDelete = "T" + keyboard.nextLine();
+                    status = sendCommand(fileToDelete, serverIP, serverPortNumber).toUpperCase();
+                    checkStatus(status);
+                }
             }
 
         } while (command != 'Q');
+    }
 
+    private static String sendCommand(String message, String serverIP, int serverPortNumber) throws IOException {
+        SocketChannel channel = SocketChannel.open();
+        channel.connect(new InetSocketAddress(serverIP, serverPortNumber));
 
         ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
         channel.write(requestBuffer);
@@ -61,7 +73,15 @@ public class Client {
         //read bytes from the buffer and convert them to byte array
         replyBuffer.get(b);
         String replyMessage = new String(b);
-        System.out.println("Reply message from server: " + replyMessage);
         channel.close();
+        return replyMessage;
+    }
+
+    private static void checkStatus(String status){
+        if(status.equals("S")){
+            System.out.println("Operation Successful");
+        } else {
+            System.out.println("Operation Failed");
+        }
     }
 }
