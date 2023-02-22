@@ -15,7 +15,6 @@ public class Client {
         String serverIP = args[0];
         int serverPort = Integer.parseInt(args[1]);
 
-        // Client enters command
         char command;
         String status;
 
@@ -36,12 +35,16 @@ public class Client {
 
             switch (command) {
                 case 'U' -> {
+
                 }
                 case 'D' -> {
 
                 }
                 case 'L' -> {
-
+                    String listOfFiles = "L";
+                    status = sendCommand(listOfFiles, serverIP, serverPort);
+                    checkStatus(String.valueOf(status.charAt(0)));
+                    System.out.println("List of Available Files: \n" + status);
                 }
                 case 'R' -> {
                     System.out.println("Enter file to be renamed: ");
