@@ -8,6 +8,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 public class Server {
     public static void main(String[] args) throws IOException {
@@ -43,8 +44,22 @@ public class Server {
                 case 'U': // upload
                 case 'D': // download
                 case 'L': {
-                    String[] listArr;
+                    File directory = new File("file_dir/");
+                    result = directory.exists();
 
+                    if (result) {
+                        // server debug statement
+                        System.out.println(listDirectory(directory));
+
+                        // send "S", send list
+                        msg = ByteBuffer.wrap(("S" + listDirectory(directory)).getBytes());
+                        serveChannel.write(msg);
+                    } else {
+                        msg = ByteBuffer.wrap("F".getBytes());
+                        serveChannel.write(msg);
+                    }
+
+                    serveChannel.close();
                     break;
                 } // list
                 case 'R': { // rename
@@ -107,5 +122,19 @@ public class Server {
         }
 
 
+    }
+
+    private static String listDirectory(File directory){
+        String[] listedDirectory = directory.list();
+        String list = "";
+        for (int i = 0; i < Objects.requireNonNull(listedDirectory).length; i++ ) {
+            list += listedDirectory[i];
+            if(new File("data" + "/" + listedDirectory[i]).isDirectory()){
+                list += "/\n";
+            } else {
+                list += "\n";
+            }
+        }
+        return list;
     }
 }
