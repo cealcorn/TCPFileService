@@ -35,26 +35,64 @@ public class Server {
             buffer.rewind();
 
             String payload;
+            File file;
+            boolean result;
+            ByteBuffer msg;
 
             switch (clientCommand) {
                 case 'U': // upload
                 case 'D': // download
-                case 'L': // list
-                case 'R': // rename
-                case 'T': // delete
+                case 'L': {
+                    String[] listArr;
+
+                    break;
+                } // list
+                case 'R': { // rename
+                    payload = clientMessage.substring(1);               // Rtest.txt -> test.txt,smile.txt
+
+                    // server debug statement
+                    System.out.println("File names received from client: " + payload);
+
+                    // separates file name
+                    String[] strArr = payload.split(",");                  // test.txt,smile.txt -> ["test.txt","smile.txt"]
+                    String fileName = strArr[0];                                // "test.txt"
+                    String newName = strArr[1];                                 // "smile.txt"
+
+                    // server debug statement
+                    System.out.println("Original file name: " + fileName);
+                    System.out.println("Name to be renamed to: " + newName);
+
+                    file = new File("file_dir/" + fileName);
+                    File rename = new File("file_dir/" + newName);
+                    result = file.renameTo(rename);
+
+                    // server debug statement
+                    System.out.println("Rename success: " + result);
+                    System.out.println("New file name:" + file);
+
+                    if (result) {
+                        msg = ByteBuffer.wrap("S".getBytes());
+                    } else {
+                        msg = ByteBuffer.wrap("F".getBytes());
+                    }
+                    serveChannel.write(msg);
+                    serveChannel.close();
+                    break;
+                }
+
+                case 'T': { // delete
                     payload = clientMessage.substring(1);
-                    File file = new File("file_dir/" + payload);
+                    file = new File("file_dir/" + payload);
 
                     // server debug statement
                     System.out.println("Name of file: " + file.getName());
 
-                    boolean result = file.delete();
+                    result = file.delete();
 
                     // server debug statement
                     System.out.println("File was successfully deleted: " + result);
 
                     // sends client appropriate response
-                    ByteBuffer msg;
                     if (result == true) {
                         msg = ByteBuffer.wrap("S".getBytes());
                     } else {
@@ -62,6 +100,9 @@ public class Server {
                     }
                     serveChannel.write(msg);
                     serveChannel.close();
+                    break;
+                }
+
             }
         }
 
