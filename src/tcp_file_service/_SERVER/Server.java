@@ -40,7 +40,7 @@ public class Server {
             switch (clientCommand) {
                 case 'U': // upload (RECEIVE FILE FROM CLIENT)
                 case 'D': { // download (SEND FILE TO CLIENT)
-                    payload = clientMessage.substring(1);
+                    payload = clientMessage.substring(2); // start at index 2 bc client sends "," before file name
 
                     // server debug statement
                     System.out.println("File to send to client: " + payload);
@@ -57,21 +57,42 @@ public class Server {
 //                        int fileSize = (int) fileToDownload.length();
                         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToDownload));
 
+                        // old code
                         // while loop to read file contents
-                        String currentLine;
-                        while ( (currentLine = bufferedReader.readLine()) != null) {
-                            currentLine = bufferedReader.readLine();
-                            ByteBuffer lineToSend = ByteBuffer.wrap(currentLine.getBytes());
+//                        String currentLine;
+//                        while ( (currentLine = bufferedReader.readLine()) != null) {
+//                            currentLine = bufferedReader.readLine();
+//                            ByteBuffer lineToSend = ByteBuffer.wrap(currentLine.getBytes());
+//
+//                            serveChannel.write(lineToSend);
+//                        }
+//                    } else {
+//                        System.out.println("File is empty.");
+//                        serveChannel.write(ByteBuffer.wrap( ("File is empty. No content can be download.").getBytes() ));
+//                    }
+                        try {
+                            String line = bufferedReader.readLine();
 
-                            serveChannel.write(lineToSend);
+                            while (line != null) {
+                                ByteBuffer lineToSend = ByteBuffer.wrap((line + "\n").getBytes());
+
+                                // server debug
+                                System.out.println(line);
+//                                System.out.println(lineToSend);
+
+                                serveChannel.write(lineToSend);
+                                // read next line
+                                line = bufferedReader.readLine();
+                            }
+
+                            bufferedReader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } else {
-                        System.out.println("File is empty.");
-                        serveChannel.write(ByteBuffer.wrap( ("File is empty. No content can be download.").getBytes() ));
-                    }
 
-                    serveChannel.close();
-                    break;
+                        serveChannel.close();
+                        break;
+                    }
                 }
                 case 'L': { // list
                     File directory = new File("file_dir/");
