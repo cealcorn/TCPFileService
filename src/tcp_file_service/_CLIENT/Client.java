@@ -41,6 +41,7 @@ public class Client {
                     System.out.println("Enter file to be downloaded: ");
                     String fileToDownload = "D," + keyboard.next();
                     status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
+                    //TODO: Status is always returning as FAILED
                     checkStatus(status);
 
                 }
@@ -48,7 +49,8 @@ public class Client {
                     String listOfFiles = "L";
                     status = sendCommand(listOfFiles, serverIP, serverPort);
                     checkStatus(String.valueOf(status.charAt(0)));
-                    System.out.println("List of Available Files: \n" + status);
+
+                    System.out.println("List of Available Files: \n" + status.substring(1));
                 }
                 case 'R' -> {
                     System.out.println("Enter file to be renamed: ");
