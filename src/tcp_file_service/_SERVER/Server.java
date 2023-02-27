@@ -1,18 +1,15 @@
 package tcp_file_service._SERVER;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class Server {
     public static void main(String[] args) throws IOException {
-        if(args.length != 1){
+        if (args.length != 1) {
             System.out.println("Usage: tcp_file_service._SERVER.Server <ServerPort>");
             return;
         }
@@ -41,9 +38,42 @@ public class Server {
             ByteBuffer msg;
 
             switch (clientCommand) {
-                case 'U': // upload
-                case 'D': // download
-                case 'L': {
+                case 'U': // upload (RECEIVE FILE FROM CLIENT)
+                case 'D': { // download (SEND FILE TO CLIENT)
+                    payload = clientMessage.substring(1);
+
+                    // server debug statement
+                    System.out.println("File to send to client: " + payload);
+
+                    File fileToDownload = new File("file_dir/" + payload);
+                    result = (fileToDownload).exists();
+
+                    // server debug statement
+                    System.out.println("File exists?: " + result);
+
+                    // download file to client
+                    if (fileToDownload.length() != 0) {
+                        // initialize variables
+//                        int fileSize = (int) fileToDownload.length();
+                        BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToDownload));
+
+                        // while loop to read file contents
+                        String currentLine;
+                        while ( (currentLine = bufferedReader.readLine()) != null) {
+                            currentLine = bufferedReader.readLine();
+                            ByteBuffer lineToSend = ByteBuffer.wrap(currentLine.getBytes());
+
+                            serveChannel.write(lineToSend);
+                        }
+                    } else {
+                        System.out.println("File is empty.");
+                        serveChannel.write(ByteBuffer.wrap( ("File is empty. No content can be download.").getBytes() ));
+                    }
+
+                    serveChannel.close();
+                    break;
+                }
+                case 'L': { // list
                     File directory = new File("file_dir/");
                     result = directory.exists();
 
@@ -61,7 +91,7 @@ public class Server {
 
                     serveChannel.close();
                     break;
-                } // list
+                }
                 case 'R': { // rename
                     payload = clientMessage.substring(1);               // Rtest.txt -> test.txt,smile.txt
 
@@ -124,12 +154,12 @@ public class Server {
 
     }
 
-    private static String listDirectory(File directory){
+    private static String listDirectory(File directory) {
         String[] listedDirectory = directory.list();
         String list = "";
-        for (int i = 0; i < Objects.requireNonNull(listedDirectory).length; i++ ) {
+        for (int i = 0; i < Objects.requireNonNull(listedDirectory).length; i++) {
             list += listedDirectory[i];
-            if(new File("data" + "/" + listedDirectory[i]).isDirectory()){
+            if (new File("data" + "/" + listedDirectory[i]).isDirectory()) {
                 list += "/\n";
             } else {
                 list += "\n";
