@@ -1,6 +1,6 @@
 package tcp_file_service._CLIENT;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -38,6 +38,10 @@ public class Client {
 
                 }
                 case 'D' -> {
+                    System.out.println("Enter file to be downloaded: ");
+                    String fileToDownload = "D," + keyboard.next();
+                    status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
+                    checkStatus(status);
 
                 }
                 case 'L' -> {
@@ -88,6 +92,47 @@ public class Client {
         channel.close();
         return replyMessage;
     }
+
+    private static String downloadFile(String message, String serverIP, int serverPortNumber) throws IOException {
+        SocketChannel channel = SocketChannel.open();
+        channel.connect(new InetSocketAddress(serverIP, serverPortNumber));
+
+        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
+        channel.write(requestBuffer);
+        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+
+        //Get file name
+        String[] messageArr = message.split(",");
+        String fileName = messageArr[1];
+        FileOutputStream outputStream = new FileOutputStream(fileName);
+
+        //read from the TCP channel and write to the buffer
+        int bytesRead = channel.read(replyBuffer);
+        replyBuffer.flip();
+        byte[] statusByte = new byte[bytesRead];
+
+        //read bytes from the buffer and convert them to byte array
+        replyBuffer.get(statusByte);
+        String replyMessage = new String(statusByte);
+
+        //Clear replyBuffer
+        replyBuffer.clear();
+
+        //read from the TCP channel and write to the file
+        int contentRead;
+        byte[] fileContent = new byte[1024];
+        while((contentRead = channel.read(replyBuffer)) !=-1) {
+            replyBuffer.flip();
+            replyBuffer.get(fileContent, 0, contentRead);
+            outputStream.write(fileContent, 0, contentRead);
+            replyBuffer.clear();
+        }
+
+        channel.shutdownOutput();
+        channel.close();
+        return replyMessage;
+    }
+
 
     private static void checkStatus(String status){
         if(status.equals("S")){
