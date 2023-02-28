@@ -35,11 +35,15 @@ public class Client {
 
             switch (command) {
                 case 'U' -> {
+                    System.out.println("Enter file to be uploaded: ");
+                    String fileToUpload = "U," + keyboard.nextLine();
+                    status = uploadFile(fileToUpload, serverIP, serverPort).toUpperCase();
+                    checkStatus(status);
 
                 }
                 case 'D' -> {
                     System.out.println("Enter file to be downloaded: ");
-                    String fileToDownload = "D," + keyboard.next();
+                    String fileToDownload = "D," + keyboard.nextLine();
                     status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
                     //TODO: Status is always returning as FAILED
                     checkStatus(status);
@@ -49,7 +53,6 @@ public class Client {
                     String listOfFiles = "L";
                     status = sendCommand(listOfFiles, serverIP, serverPort);
                     checkStatus(String.valueOf(status.charAt(0)));
-
                     System.out.println("List of Available Files: \n" + status.substring(1));
                 }
                 case 'R' -> {
@@ -103,10 +106,8 @@ public class Client {
         channel.write(requestBuffer);
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
-        //Get file name
-        String[] messageArr = message.split(",");
-        String fileName = messageArr[1];
-        FileOutputStream outputStream = new FileOutputStream(fileName);
+        //Get file
+        FileOutputStream outputStream = new FileOutputStream(message.substring(1));
 
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
@@ -135,6 +136,46 @@ public class Client {
         return replyMessage;
     }
 
+    private static String uploadFile(String message, String serverIP, int serverPortNumber) throws IOException {
+        SocketChannel channel = SocketChannel.open();
+        channel.connect(new InetSocketAddress(serverIP, serverPortNumber));
+
+        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
+        channel.write(requestBuffer);
+        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+
+        //read from the TCP channel and write to the buffer
+        int bytesRead = channel.read(replyBuffer);
+
+        //Be sure to call shutdownOutput when done sending
+        replyBuffer.flip();
+        byte[] b = new byte[bytesRead];
+
+        //read bytes from the buffer and convert them to byte array
+        replyBuffer.get(b);
+        String replyMessage = new String(b);
+
+        // Send file contents separately
+        File file = new File("file_dir/" + message.substring(1));
+        if(file.length() != 0 && file.exists()){
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+            try {
+                String line = bufferedReader.readLine();
+                while (line != null) {
+                    ByteBuffer lineToSend = ByteBuffer.wrap((line + "\n").getBytes());
+                    channel.write(lineToSend);
+                    // read next line
+                    line = bufferedReader.readLine();
+                }
+                bufferedReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        channel.shutdownOutput();
+        channel.close();
+        return replyMessage;
+    }
 
     private static void checkStatus(String status){
         if(status.equals("S")){
