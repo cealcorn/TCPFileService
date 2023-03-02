@@ -34,14 +34,14 @@ public class Client {
             command = keyboard.nextLine().toUpperCase().charAt(0);
 
             switch (command) {
-                case 'U' -> {
+                case 'U' -> { //Upload
                     System.out.println("Enter file to be uploaded: ");
-                    String fileToUpload = "U," + keyboard.nextLine();
+                    String fileToUpload = "U" + keyboard.nextLine();
                     status = uploadFile(fileToUpload, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
 
                 }
-                case 'D' -> {
+                case 'D' -> { //Download
                     System.out.println("Enter file to be downloaded: ");
                     String fileToDownload = "D," + keyboard.nextLine();
                     status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
@@ -49,13 +49,13 @@ public class Client {
                     checkStatus(status);
 
                 }
-                case 'L' -> {
+                case 'L' -> { //List
                     String listOfFiles = "L";
                     status = sendCommand(listOfFiles, serverIP, serverPort);
                     checkStatus(String.valueOf(status.charAt(0)));
                     System.out.println("List of Available Files: \n" + status.substring(1));
                 }
-                case 'R' -> {
+                case 'R' -> { //Rename
                     System.out.println("Enter file to be renamed: ");
                     String oldFileName = keyboard.nextLine();
                     System.out.println("Enter new file name: ");
@@ -64,7 +64,7 @@ public class Client {
                     status = sendCommand(fileToRename, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
                 }
-                case 'T' -> {
+                case 'T' -> { //Delete
                     System.out.println("Enter file name: ");
                     String fileToDelete = "T" + keyboard.nextLine();
                     status = sendCommand(fileToDelete, serverIP, serverPort).toUpperCase();
@@ -156,7 +156,7 @@ public class Client {
         String replyMessage = new String(b);
 
         // Send file contents separately
-        File file = new File("file_dir/" + message.substring(1));
+        File file = new File("dir/" + message.substring(1));
         if(file.length() != 0 && file.exists()){
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             try {
