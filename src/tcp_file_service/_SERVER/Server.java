@@ -36,9 +36,28 @@ public class Server {
             File file;
             boolean result;
             ByteBuffer msg;
+            String[] strArr;
 
             switch (clientCommand) {
-                case 'U': // upload (RECEIVE FILE FROM CLIENT)
+                case 'U': { // upload (RECEIVE FILE FROM CLIENT)
+                    payload = clientMessage.substring(1);
+
+                    // server debug statement
+                    System.out.println("Received from client: " + payload);
+
+                    strArr = payload.split(",");
+                    String fileName = strArr[0];
+                    String fileContents = strArr[1];
+
+                    // read and write content from client to file
+                    FileWriter fileWriter;
+                    fileWriter = new FileWriter("file_dir/" + fileName);
+                    fileWriter.write(fileContents);
+                    fileWriter.close();
+
+                    serveChannel.close();
+                    break;
+                }
                 case 'D': { // download (SEND FILE TO CLIENT)
                     payload = clientMessage.substring(2); // start at index 2 bc client sends "," before file name
 
@@ -54,22 +73,8 @@ public class Server {
                     // download file to client
                     if (fileToDownload.length() != 0) {
                         // initialize variables
-//                        int fileSize = (int) fileToDownload.length();
                         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileToDownload));
 
-                        // old code
-                        // while loop to read file contents
-//                        String currentLine;
-//                        while ( (currentLine = bufferedReader.readLine()) != null) {
-//                            currentLine = bufferedReader.readLine();
-//                            ByteBuffer lineToSend = ByteBuffer.wrap(currentLine.getBytes());
-//
-//                            serveChannel.write(lineToSend);
-//                        }
-//                    } else {
-//                        System.out.println("File is empty.");
-//                        serveChannel.write(ByteBuffer.wrap( ("File is empty. No content can be download.").getBytes() ));
-//                    }
                         try {
                             String line = bufferedReader.readLine();
 
@@ -120,7 +125,7 @@ public class Server {
                     System.out.println("File names received from client: " + payload);
 
                     // separates file name
-                    String[] strArr = payload.split(",");                  // test.txt,smile.txt -> ["test.txt","smile.txt"]
+                    strArr = payload.split(",");                  // test.txt,smile.txt -> ["test.txt","smile.txt"]
                     String fileName = strArr[0];                                // "test.txt"
                     String newName = strArr[1];                                 // "smile.txt"
 
