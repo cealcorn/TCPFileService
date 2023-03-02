@@ -34,20 +34,19 @@ public class Client {
             command = keyboard.nextLine().toUpperCase().charAt(0);
 
             switch (command) {
-                case 'U' -> { //Upload
+                case 'U' -> { //Upload to server
                     System.out.println("Enter file to be uploaded: ");
                     String fileToUpload = "U" + keyboard.nextLine();
                     status = uploadFile(fileToUpload, serverIP, serverPort).toUpperCase();
                     checkStatus(status);
 
                 }
-                case 'D' -> { //Download
+                case 'D' -> { //Download from server
                     System.out.println("Enter file to be downloaded: ");
                     String fileToDownload = "D," + keyboard.nextLine();
                     status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
                     //TODO: Status is always returning as FAILED
                     checkStatus(status);
-
                 }
                 case 'L' -> { //List
                     String listOfFiles = "L";
@@ -86,7 +85,7 @@ public class Client {
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
 
-        //Be sure to call shutdownOutput when done sending
+        //shutdown output
         channel.shutdownOutput();
         replyBuffer.flip();
         byte[] b = new byte[bytesRead];
@@ -107,7 +106,7 @@ public class Client {
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
         //Get file
-        FileOutputStream outputStream = new FileOutputStream(message.substring(1));
+        FileOutputStream outputStream = new FileOutputStream("dir/" + message.substring(1));
 
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
@@ -118,10 +117,11 @@ public class Client {
         replyBuffer.get(statusByte);
         String replyMessage = new String(statusByte);
 
-        //Clear replyBuffer
+        //clear replyBuffer
         replyBuffer.clear();
 
         //read from the TCP channel and write to the file
+        //send contents separately
         int contentRead;
         byte[] fileContent = new byte[1024];
         while((contentRead = channel.read(replyBuffer)) !=-1) {
@@ -147,7 +147,7 @@ public class Client {
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
 
-        //Be sure to call shutdownOutput when done sending
+        //be sure to call shutdownOutput when done sending
         replyBuffer.flip();
         byte[] b = new byte[bytesRead];
 
@@ -155,7 +155,7 @@ public class Client {
         replyBuffer.get(b);
         String replyMessage = new String(b);
 
-        // Send file contents separately
+        //send file contents separately
         File file = new File("dir/" + message.substring(1));
         if(file.length() != 0 && file.exists()){
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
