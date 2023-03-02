@@ -43,7 +43,7 @@ public class Client {
                 }
                 case 'D' -> { //Download from server
                     System.out.println("Enter file to be downloaded: ");
-                    String fileToDownload = "D," + keyboard.nextLine();
+                    String fileToDownload = "D" + keyboard.nextLine();
                     status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
                     //TODO: Status is always returning as FAILED
                     checkStatus(status);
@@ -105,15 +105,15 @@ public class Client {
         channel.write(requestBuffer);
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
-        //Get file
+        //get file
         FileOutputStream outputStream = new FileOutputStream("dir/" + message.substring(1));
 
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
         replyBuffer.flip();
-        byte[] statusByte = new byte[bytesRead];
 
         //read bytes from the buffer and convert them to byte array
+        byte[] statusByte = new byte[bytesRead];
         replyBuffer.get(statusByte);
         String replyMessage = new String(statusByte);
 
@@ -130,7 +130,7 @@ public class Client {
             outputStream.write(fileContent, 0, contentRead);
             replyBuffer.clear();
         }
-
+        //shutdown output
         channel.shutdownOutput();
         channel.close();
         return replyMessage;
@@ -146,8 +146,6 @@ public class Client {
 
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
-
-        //be sure to call shutdownOutput when done sending
         replyBuffer.flip();
         byte[] b = new byte[bytesRead];
 
@@ -155,8 +153,10 @@ public class Client {
         replyBuffer.get(b);
         String replyMessage = new String(b);
 
-        //send file contents separately
+        //get file
         File file = new File("dir/" + message.substring(1));
+
+        //send file contents separately
         if(file.length() != 0 && file.exists()){
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             try {
@@ -172,12 +172,13 @@ public class Client {
                 e.printStackTrace();
             }
         }
+        //shutdown output
         channel.shutdownOutput();
         channel.close();
         return replyMessage;
     }
 
-    private static void checkStatus(String status){
+    private static void checkStatus(String status){// Check if command was successful or failed
         if(status.equals("S")){
             System.out.println("Operation Successful");
         } else {
