@@ -13,9 +13,11 @@ public class Server {
             System.out.println("Usage: tcp_file_service._SERVER.Server <ServerPort>");
             return;
         }
+
         int serverPort = Integer.parseInt(args[0]);
         ServerSocketChannel listenChannel = ServerSocketChannel.open();
         listenChannel.socket().bind(new InetSocketAddress(serverPort));
+
         while (true) {
             SocketChannel serveChannel = listenChannel.accept();
             ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -40,20 +42,28 @@ public class Server {
 
             switch (clientCommand) {
                 case 'U': { // upload (RECEIVE FILE FROM CLIENT)
+                    // server debug statement
+                    System.out.println("Initial message: " + clientMessage);
+
                     payload = clientMessage.substring(1);
 
                     // server debug statement
-                    System.out.println("Received from client: " + payload);
+                    System.out.println("File to receive from client: " + payload);
 
-                    strArr = payload.split(",");
-                    String fileName = strArr[0];
-                    String fileContents = strArr[1];
+                    downloadFile(payload, serverPort, serveChannel);
 
-                    // read and write content from client to file
-                    FileWriter fileWriter;
-                    fileWriter = new FileWriter("file_dir/" + fileName);
-                    fileWriter.write(fileContents);
-                    fileWriter.close();
+                    file = new File("file_dir/" + payload);
+
+                    // server debug statement
+                    System.out.println("Does file exist?: " + payload + " | " + file.exists());
+
+                    if (file.exists()) {
+                        msg = ByteBuffer.wrap("S".getBytes());
+                        serveChannel.write(msg);
+                    } else {
+                        msg = ByteBuffer.wrap("F".getBytes());
+                        serveChannel.write(msg);
+                    }
 
                     serveChannel.close();
                     break;
@@ -192,5 +202,42 @@ public class Server {
             }
         }
         return list;
+    }
+
+    private static void downloadFile(String message, int serverPortNumber, SocketChannel serveChannel) throws IOException {
+        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
+        serveChannel.write(requestBuffer);
+        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+
+        //Get file
+        FileOutputStream outputStream = new FileOutputStream("file_dir/" + message);
+
+        //read from the TCP channel and write to the buffer
+        int bytesRead = serveChannel.read(replyBuffer);
+
+        // server debug statement
+        System.out.println("Bytes read: " + bytesRead);
+
+        replyBuffer.flip();
+        byte[] statusByte = new byte[bytesRead];
+
+        //read bytes from the buffer and convert them to byte array
+        replyBuffer.get(statusByte);
+        String replyMessage = new String(statusByte);
+
+        //Clear replyBuffer
+        replyBuffer.clear();
+
+        //read from the TCP channel and write to the file
+        int contentRead;
+        byte[] fileContent = new byte[1024];
+        while((contentRead = serveChannel.read(replyBuffer)) !=-1) {
+            replyBuffer.flip();
+            replyBuffer.get(fileContent, 0, contentRead);
+            outputStream.write(fileContent, 0, contentRead);
+            replyBuffer.clear();
+
+            System.out.println("File content: " + fileContent);
+        }
     }
 }
