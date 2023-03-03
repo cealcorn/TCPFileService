@@ -103,32 +103,30 @@ public class Client {
         ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
         channel.write(requestBuffer);
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+        String replyMessage;
 
         //get file
-        FileOutputStream outputStream = new FileOutputStream("client_file_dir/" + message.substring(1));
-
-        //read from the TCP channel and write to the buffer
-        int bytesRead = channel.read(replyBuffer);
-        replyBuffer.flip();
-
-        //read bytes from the buffer and convert them to byte array
-        byte[] statusByte = new byte[bytesRead];
-        replyBuffer.get(statusByte);
-        String replyMessage = new String(statusByte);
-
-        //clear replyBuffer
-        replyBuffer.clear();
+        File file = new File("client_file_dir/" + message.substring(1));
 
         //read from the TCP channel and write to the file
-        //send contents separately
-        int contentRead;
-        byte[] fileContent = new byte[1024];
-        while((contentRead = channel.read(replyBuffer)) !=-1) {
-            replyBuffer.flip();
-            replyBuffer.get(fileContent, 0, contentRead);
-            outputStream.write(fileContent, 0, contentRead);
-            replyBuffer.clear();
+        //contents sent separately
+        FileOutputStream outputStream = new FileOutputStream("client_file_dir/" + message.substring(1));
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        int bytesRead;
+
+        while ((bytesRead = channel.read(buffer)) != -1) {
+            buffer.flip();
+            byte[] bytes = new byte[bytesRead];
+            buffer.get(bytes, 0, bytesRead);
+            outputStream.write(bytes);
+            buffer.clear();
         }
+        if(file.exists() && file.length() != 0){
+            replyMessage = "S";
+        } else {
+            replyMessage = "F";
+        }
+
         //shutdown output
         channel.shutdownOutput();
         channel.close();

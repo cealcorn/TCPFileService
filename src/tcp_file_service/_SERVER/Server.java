@@ -52,7 +52,7 @@ public class Server {
 
                     downloadFile(payload, serveChannel);
 
-                    file = new File("file_dir/" + payload);
+                    file = new File("server_file_dir/" + payload);
 
                     // server debug statement
                     System.out.println("Does file exist?: " + file.exists() + " | " + file.getName().equals(payload) +
@@ -74,12 +74,12 @@ public class Server {
                     break;
                 }
                 case 'D': { // download (SEND FILE TO CLIENT)
-                    payload = clientMessage.substring(2); // start at index 2 bc client sends "," before file name
+                    payload = clientMessage.substring(1);
 
                     // server debug statement
                     System.out.println("File to send to client: " + payload);
 
-                    File fileToDownload = new File("file_dir/" + payload);
+                    File fileToDownload = new File("server_file_dir/" + payload);
                     result = (fileToDownload).exists();
 
                     // server debug statement
@@ -92,13 +92,12 @@ public class Server {
 
                         try {
                             String line = bufferedReader.readLine();
-
                             while (line != null) {
                                 ByteBuffer lineToSend = ByteBuffer.wrap((line + "\n").getBytes());
 
-                                // server debug
+                                // server debug statment
                                 System.out.println(line);
-//                                System.out.println(lineToSend);
+                                System.out.println(lineToSend);
 
                                 serveChannel.write(lineToSend);
                                 // read next line
@@ -115,7 +114,7 @@ public class Server {
                     }
                 }
                 case 'L': { // list
-                    File directory = new File("file_dir/");
+                    File directory = new File("server_file_dir/");
                     result = directory.exists();
 
                     if (result) {
@@ -148,8 +147,8 @@ public class Server {
                     System.out.println("Original file name: " + fileName);
                     System.out.println("Name to be renamed to: " + newName);
 
-                    file = new File("file_dir/" + fileName);
-                    File rename = new File("file_dir/" + newName);
+                    file = new File("server_file_dir/" + fileName);
+                    File rename = new File("server_file_dir/" + newName);
                     result = file.renameTo(rename);
 
                     // server debug statement
@@ -168,7 +167,7 @@ public class Server {
 
                 case 'T': { // delete
                     payload = clientMessage.substring(1);
-                    file = new File("file_dir/" + payload);
+                    file = new File("server_file_dir/" + payload);
 
                     // server debug statement
                     System.out.println("Name of file: " + file.getName());
@@ -211,7 +210,7 @@ public class Server {
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
         //Get file
-        FileOutputStream outputStream = new FileOutputStream("file_dir/" + message);
+        FileOutputStream outputStream = new FileOutputStream("server_file_dir/" + message);
 
         //read from the TCP channel and write to the file
         int contentRead;
