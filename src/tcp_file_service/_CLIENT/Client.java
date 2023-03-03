@@ -44,7 +44,7 @@ public class Client {
                 case 'D' -> { //Download from server
                     System.out.println("Enter file to be downloaded: ");
                     String fileToDownload = "D" + keyboard.nextLine();
-                    status = downloadFile(fileToDownload, serverIP, serverPort).toUpperCase();
+                    status = downloadFile(fileToDownload, serverIP, serverPort);
                     checkStatus(status);
                 }
                 case 'L' -> { //List
@@ -102,7 +102,6 @@ public class Client {
 
         ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
         channel.write(requestBuffer);
-        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
         String replyMessage;
 
         //get file
@@ -113,7 +112,6 @@ public class Client {
         FileOutputStream outputStream = new FileOutputStream("client_file_dir/" + message.substring(1));
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         int bytesRead;
-
         while ((bytesRead = channel.read(buffer)) != -1) {
             buffer.flip();
             byte[] bytes = new byte[bytesRead];
@@ -121,15 +119,16 @@ public class Client {
             outputStream.write(bytes);
             buffer.clear();
         }
+        //shutdown output
+        channel.shutdownOutput();
+        channel.close();
+
+        //check success or failure
         if(file.exists() && file.length() != 0){
             replyMessage = "S";
         } else {
             replyMessage = "F";
         }
-
-        //shutdown output
-        channel.shutdownOutput();
-        channel.close();
         return replyMessage;
     }
 
@@ -162,7 +161,6 @@ public class Client {
                 e.printStackTrace();
             }
         }
-
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
         //read from the TCP channel and write to the buffer
@@ -173,9 +171,6 @@ public class Client {
         //read bytes from the buffer and convert them to byte array
         replyBuffer.get(b);
         String replyMessage = new String(b);
-
-        // client debug statement
-        System.out.println("Reply message: " + replyMessage);
 
         channel.close();
         return replyMessage;

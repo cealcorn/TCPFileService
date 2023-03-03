@@ -63,7 +63,7 @@ public class Server {
                     // server debug statement
                     System.out.println("Result: " + result);
 
-                    if (result) {
+                    if (result == true) {
                         msg = ByteBuffer.wrap("S".getBytes());
                     } else {
                         msg = ByteBuffer.wrap("F".getBytes());
@@ -103,12 +103,10 @@ public class Server {
                                 // read next line
                                 line = bufferedReader.readLine();
                             }
-
                             bufferedReader.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
                         serveChannel.close();
                         break;
                     }
@@ -178,7 +176,7 @@ public class Server {
                     System.out.println("File was successfully deleted: " + result);
 
                     // sends client appropriate response
-                    if (result == true) {
+                    if (result) {
                         msg = ByteBuffer.wrap("S".getBytes());
                     } else {
                         msg = ByteBuffer.wrap("F".getBytes());
@@ -194,16 +192,16 @@ public class Server {
 
     private static String listDirectory(File directory) {
         String[] listedDirectory = directory.list();
-        String list = "";
+        StringBuilder list = new StringBuilder();
         for (int i = 0; i < Objects.requireNonNull(listedDirectory).length; i++) {
-            list += listedDirectory[i];
+            list.append(listedDirectory[i]);
             if (new File("data" + "/" + listedDirectory[i]).isDirectory()) {
-                list += "/\n";
+                list.append("/\n");
             } else {
-                list += "\n";
+                list.append("\n");
             }
         }
-        return list;
+        return list.toString();
     }
 
     private static void downloadFile(String message, SocketChannel serveChannel) throws IOException {
