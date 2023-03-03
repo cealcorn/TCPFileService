@@ -58,7 +58,7 @@ public class Server {
                     System.out.println("Does file exist?: " + file.exists() + " | " + file.getName().equals(payload) +
                             " | " + file.length() + " | " + payload);
 
-                    result = file.exists(); // && file.getName().equals(payload) && file.length() != 0
+                    result = file.exists();
 
                     // server debug statement
                     System.out.println("Result: " + result);
@@ -134,15 +134,15 @@ public class Server {
                     break;
                 }
                 case 'R': { // rename
-                    payload = clientMessage.substring(1);               // Rtest.txt -> test.txt,smile.txt
+                    payload = clientMessage.substring(1);// Rtest.txt -> test.txt,smile.txt
 
                     // server debug statement
                     System.out.println("File names received from client: " + payload);
 
                     // separates file name
-                    strArr = payload.split(",");                  // test.txt,smile.txt -> ["test.txt","smile.txt"]
-                    String fileName = strArr[0];                                // "test.txt"
-                    String newName = strArr[1];                                 // "smile.txt"
+                    strArr = payload.split(",");// test.txt,smile.txt -> ["test.txt","smile.txt"]
+                    String fileName = strArr[0];     // "test.txt"
+                    String newName = strArr[1];      // "smile.txt"
 
                     // server debug statement
                     System.out.println("Original file name: " + fileName);
@@ -191,8 +191,6 @@ public class Server {
 
             }
         }
-
-
     }
 
     private static String listDirectory(File directory) {
@@ -210,8 +208,6 @@ public class Server {
     }
 
     private static void downloadFile(String message, SocketChannel serveChannel) throws IOException {
-//        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
-//        serveChannel.write(requestBuffer);
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
         //Get file
@@ -226,7 +222,6 @@ public class Server {
             replyBuffer.get(fileContent, 0, contentRead);
             outputStream.write(fileContent, 0, contentRead);
             replyBuffer.clear();
-
             System.out.println("File content: " + fileContent);
         }
     }
