@@ -107,6 +107,7 @@ public class Client {
 
         //get file
         FileOutputStream outputStream = new FileOutputStream("dir/" + message.substring(1));
+//        FileOutputStream outputStream = new FileOutputStream("client_file_dir/" + message.substring(1));
 
         //read from the TCP channel and write to the buffer
         int bytesRead = channel.read(replyBuffer);
@@ -142,19 +143,23 @@ public class Client {
 
         ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
         channel.write(requestBuffer);
-        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
-
-        //read from the TCP channel and write to the buffer
-        int bytesRead = channel.read(replyBuffer);
-        replyBuffer.flip();
-        byte[] b = new byte[bytesRead];
-
-        //read bytes from the buffer and convert them to byte array
-        replyBuffer.get(b);
-        String replyMessage = new String(b);
+//        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+//
+//        //read from the TCP channel and write to the buffer
+//        int bytesRead = channel.read(replyBuffer);
+//        replyBuffer.flip();
+//        byte[] b = new byte[bytesRead];
+//
+//        //read bytes from the buffer and convert them to byte array
+//        replyBuffer.get(b);
+//        String replyMessage = new String(b);
+//
+//        // client debug statement
+//        System.out.println("Reply message: " + replyMessage);
 
         //get file
         File file = new File("dir/" + message.substring(1));
+//        File file = new File("client_file_dir/" + message.substring(1));
 
         //send file contents separately
         if(file.length() != 0 && file.exists()){
@@ -168,12 +173,30 @@ public class Client {
                     line = bufferedReader.readLine();
                 }
                 bufferedReader.close();
+
+                //shutdown output
+                channel.shutdownOutput();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        //shutdown output
-        channel.shutdownOutput();
+
+        ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
+
+        //read from the TCP channel and write to the buffer
+        int bytesRead = channel.read(replyBuffer);
+        replyBuffer.flip();
+        byte[] b = new byte[bytesRead];
+
+        //read bytes from the buffer and convert them to byte array
+        replyBuffer.get(b);
+        String replyMessage = new String(b);
+
+        // client debug statement
+        System.out.println("Reply message: " + replyMessage);
+
+//        //shutdown output
+//        channel.shutdownOutput();
         channel.close();
         return replyMessage;
     }

@@ -52,19 +52,23 @@ public class Server {
 
                     downloadFile(payload, serveChannel);
 
-//                    file = new File("file_dir/" + payload);
-//
-//                    // server debug statement
-//                    System.out.println("Does file exist?: " + file.exists() + " | " + file.getName().equals(payload) +
-//                            " | " + file.length() + " | " + payload);
-//
-//                    if (file.exists()) { //  && file.getName().equals(payload) && file.length() != 0
-//                        msg = ByteBuffer.wrap("S".getBytes());
-//                    } else {
-//                        msg = ByteBuffer.wrap("F".getBytes());
-//                    }
-//
-//                    serveChannel.write(msg);
+                    file = new File("file_dir/" + payload);
+
+                    // server debug statement
+                    System.out.println("Does file exist?: " + file.exists() + " | " + file.getName().equals(payload) +
+                            " | " + file.length() + " | " + payload);
+
+                    result = file.exists(); // && file.getName().equals(payload) && file.length() != 0
+
+                    // server debug statement
+                    System.out.println("Result: " + result);
+
+                    if (result) {
+                        msg = ByteBuffer.wrap("S".getBytes());
+                    } else {
+                        msg = ByteBuffer.wrap("F".getBytes());
+                    }
+                    serveChannel.write(msg);
 
                     serveChannel.close();
                     break;
@@ -206,8 +210,8 @@ public class Server {
     }
 
     private static void downloadFile(String message, SocketChannel serveChannel) throws IOException {
-        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
-        serveChannel.write(requestBuffer);
+//        ByteBuffer requestBuffer = ByteBuffer.wrap(message.getBytes());
+//        serveChannel.write(requestBuffer);
         ByteBuffer replyBuffer = ByteBuffer.allocate(1024);
 
         //Get file
